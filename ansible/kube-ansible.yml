@@ -18,8 +18,8 @@
 
     - name: modprobe
       shell: |
-        sudo modprobe overlay
-        sudo modprobe br_netfilter
+        modprobe overlay
+        modprobe br_netfilter
 
     - name: Set system configurations for Kubernetes networking
       file:
@@ -35,14 +35,14 @@
           net.ipv4.ip_forward = 1
 
     - name: Apply new settings
-      command: sudo sysctl --system
+      command: sysctl --system
 
     - name: Install containerd
       shell: |
-        sudo apt-get update && sudo apt-get install -y containerd
-        sudo mkdir -p /etc/containerd
-        sudo containerd config default | sudo tee /etc/containerd/config.toml
-        sudo systemctl restart containerd
+        apt-get update && apt-get install -y containerd
+        mkdir -p /etc/containerd
+        containerd config default | tee /etc/containerd/config.toml
+        systemctl restart containerd
 
     - name: Remove swapfile from /etc/fstab
       mount:
@@ -56,8 +56,8 @@
 
     - name: Install & Configure dependencies
       shell: |
-        sudo apt-get update && sudo apt-get install -y apt-transport-https curl
-        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+        apt-get update && apt-get install -y apt-transport-https curl
+        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
     - name: Create Kubernetes repo file
       file:
@@ -91,6 +91,12 @@
         name: kubectl=1.23.7-00
         state: present
         force: yes
+
+    - name: Install Helm
+      shell: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 500 get_helm.sh
+        ./get_helm.sh
 
 
 - name: Install Haproxy
