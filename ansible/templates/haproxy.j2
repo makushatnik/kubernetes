@@ -23,16 +23,16 @@ backend k8s-api
     server app{{ loop.index }}  {{hostvars[server]['ansible_host']}}:6443 check
     {% endfor %}
 frontend http
-    bind  :::80 v4v6
+    bind  :::8080 v4v6
     mode  tcp
-    default_backend http-back
-backend http-back
-    option  httpchk GET /readyz HTTP/1.0
+    default_backend http
+backend http
+    option  httpchk GET /healthz HTTP/1.0
     option  log-health-checks
     http-check expect status 200
     mode tcp
     balance roundrobin
     default-server verify none check-ssl inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 5000 maxqueue 5000 weight 100
     {% for server in groups['control_plane'] %}
-    server app{{ loop.index }}  {{hostvars[server]['ansible_host']}}:31396 check
+    server http{{ loop.index }}  192.168.20.1:32000 check
     {% endfor %}
