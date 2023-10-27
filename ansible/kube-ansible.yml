@@ -4,12 +4,12 @@
   gather_facts: true
 
   tasks:
-    - name: Create containerd config my_file
+    - name: Create containerd config file
       file:
         path: "/etc/modules-load.d/containerd.conf"
         state: "touch"
 
-    - name: Add conf for containerd 1
+    - name: Add conf for containerd
       blockinfile:
         path: "/etc/modules-load.d/containerd.conf"
         block: |
@@ -21,23 +21,24 @@
         sudo modprobe overlay
         sudo modprobe br_netfilter
 
+
     - name: Set system configurations for Kubernetes networking
       file:
         path: "/etc/sysctl.d/99-kubernetes-cri.conf"
         state: "touch"
 
-    - name: Add conf for containerd 2
+    - name: Add conf for containerd
       blockinfile:
         path: "/etc/sysctl.d/99-kubernetes-cri.conf"
         block: |
-          net.bridge.bridge-nf-call-iptables  = 1
-          net.bridge.bridge-nf-call-ip6tables = 1
+          net.bridge.bridge-nf-call-iptables = 1
           net.ipv4.ip_forward = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
 
     - name: Apply new settings
       command: sudo sysctl --system
 
-    - name: Install containerd
+    - name: install containerd
       shell: |
         sudo apt-get update && sudo apt-get install -y containerd
         sudo mkdir -p /etc/containerd
@@ -54,30 +55,30 @@
       command: swapoff -a
       when: ansible_swaptotal_mb > 0
 
-    - name: Install & Configure dependencies
+    - name: install and configure dependencies
       shell: |
         sudo apt-get update && sudo apt-get install -y apt-transport-https curl
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 
-    - name: Create Kubernetes repo file
+    - name: Create kubernetes repo file
       file:
         path: "/etc/apt/sources.list.d/kubernetes.list"
         state: "touch"
 
-    - name: Add K8s source
+    - name: Add K8s Source
       blockinfile:
         path: "/etc/apt/sources.list.d/kubernetes.list"
         block: |
           deb https://apt.kubernetes.io/ kubernetes-xenial main
 
-    - name: Install kubelet
+    - name: install kubelet
       apt:
         name: kubelet=1.23.7-00
         state: present
         update_cache: true
         force: yes
 
-    - name: Install kubeadm
+    - name: install kubeadm
       apt:
         name: kubeadm=1.23.7-00
         state: present
@@ -86,14 +87,19 @@
 - hosts: control_plane
   become: yes
   tasks:
-    - name: Install kubectl
+    - name: install kubectl
       apt:
         name: kubectl=1.23.7-00
         state: present
         force: yes
 
+    - name: install helm
+      shell: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
 
-- name: Install Haproxy
+- name: Install haproxy
   hosts: lb
   become: true
   gather_facts: true
@@ -101,34 +107,30 @@
     my_file: /etc/haproxy/haproxy.cfg
     my_template: templates/haproxy.j2
   tasks:
-    - name: Gather facts from the control_plane
-      tags: ['control_plane']
+    - name: gather facts from the control_plane
+      tags: [ 'control_plane' ]
       setup:
       delegate_to: "{{item}}"
       delegate_facts: True
       with_items: "{{groups['control_plane']}}"
-
-    - name: Install Haproxy
+    - name: install haproxy
       apt:
         name: haproxy
         state: present
         update_cache: true
         force: yes
-
-    - name: Stop Haproxy service
+    - name: Stop haproxy service
       service:
         name: haproxy
         state: stopped
-
-    - name: Create "{{my_file}}"
+    - name: Create "{{ my_file }}"
       ansible.builtin.template:
-        src: "{{my_template}}"
-        dest: "{{my_file}}"
+        src: "{{ my_template }}"
+        dest: "{{ my_file }}"
         owner: root
         group: root
         mode: "0644"
-
-    - name: Start Haproxy service
+    - name: start haproxy service
       service:
         name: haproxy
         state: started
