@@ -4,6 +4,7 @@ resource "yandex_vpc_network" "k8s-network" {
   name = "k8s-network"
 }
 
+# DMZ. Network VPC1
 resource "yandex_vpc_subnet" "gateway" {
   name           = "gateway"
   zone           = "ru-central1-a"
@@ -14,6 +15,7 @@ resource "yandex_vpc_subnet" "gateway" {
   ]
 }
 
+# Inner. Network VPC2
 resource "yandex_vpc_subnet" "k8s-subnet-1" {
   name           = "k8s-subnet-1"
   zone           = "ru-central1-a"

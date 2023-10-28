@@ -1,6 +1,8 @@
 # E-Shop on Kubernetes
 
 ## Deploy
+
+### Preparing
 1. Create an account on Yandex Cloud (if you don't have one).
 2. Getting YCloud token:
 `yc iam create-token`
@@ -19,4 +21,8 @@ kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/baremetal/deploy.yaml
 ```
 
-
+### Application
+1. kubectl create -f kubernetes-manifests.yaml
+2. Create Ingress:
+`kubectl create -f ingress.yml`
+3. docker build https://github.com/GoogleCloudPlatform/microservices-demo.git#main:src/loadgenerator -t loadgenerator

@@ -32,11 +32,12 @@ resource "yandex_compute_instance_group" "k8s-masters" {
         yandex_vpc_subnet.k8s-subnet-2.id,
         yandex_vpc_subnet.k8s-subnet-3.id,
       ]
+      # For future delete
       nat = true
     }
 
     metadata = {
-      ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
     }
     network_settings {
       type = "STANDARD"
@@ -102,11 +103,12 @@ resource "yandex_compute_instance_group" "k8s-workers" {
         yandex_vpc_subnet.k8s-subnet-2.id,
         yandex_vpc_subnet.k8s-subnet-3.id,
       ]
+      # For future delete
       nat = true
     }
 
     metadata = {
-      ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
     }
     network_settings {
       type = "STANDARD"
@@ -176,7 +178,7 @@ resource "yandex_compute_instance_group" "k8s-haproxy" {
     }
 
     metadata = {
-      ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
     }
     network_settings {
       type = "STANDARD"
@@ -242,7 +244,7 @@ resource "yandex_compute_instance_group" "k8s-haproxy" {
 #     }
 
 #     metadata = {
-#       ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+#       ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
 #     }
 #     network_settings {
 #       type = "STANDARD"
