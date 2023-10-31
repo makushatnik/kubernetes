@@ -48,6 +48,7 @@ Selector labels
 {{- define "loadgenerator.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "loadgenerator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app: loadgenerator
 {{- end }}
 
 {{/*

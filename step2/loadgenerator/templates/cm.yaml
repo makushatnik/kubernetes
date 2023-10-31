@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cmloadgenerator
+data:
+  frontend_srv: "frontend:80"
+  user_count: "10"
