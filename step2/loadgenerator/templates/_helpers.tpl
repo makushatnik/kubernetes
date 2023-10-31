@@ -50,14 +50,3 @@ app.kubernetes.io/name: {{ include "loadgenerator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app: loadgenerator
 {{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "loadgenerator.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "loadgenerator.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}

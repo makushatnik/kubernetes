@@ -27,27 +27,36 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "loadgenerator.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: 5
+      restartPolicy: Always
+      initContainers:
+        - name: frontend-check
+          image: busybox:latest
+          command:
+          - /bin/sh
+          - -exc
+          - |
+            echo "Init container pinging frontend: ${FRONTEND_ADDR}..."
+            STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^ HTTP/{print $2}')
+            if test $STATUSCODE -ne 200; then
+                echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
+                exit 1
+            fi
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+            {{- toYaml .Values.env.frontend_srv | nindent 12 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          env:
+            {{- toYaml .Values.env.frontend_srv | nindent 12 }}
+            {{- toYaml .Values.env.users | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}
