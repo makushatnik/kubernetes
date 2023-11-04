@@ -31,7 +31,6 @@ spec:
       labels:
         app: emailservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -97,7 +96,6 @@ spec:
       labels:
         app: checkoutservice
     spec:
-      serviceAccountName: default
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -170,7 +168,6 @@ spec:
       labels:
         app: recommendationservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -229,6 +226,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  instance/attributes/cluster-name: myk8s
 spec:
   selector:
     matchLabels:
@@ -239,8 +237,8 @@ spec:
         app: frontend
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      instance/attributes/cluster-name: myk8s
     spec:
-      serviceAccountName: default
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -291,10 +289,8 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
-          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
-          # - name: ENV_PLATFORM
-          #   value: "aws"
+          - name: ENV_PLATFORM
+            value: "local"
           - name: ENABLE_PROFILER
             value: "0"
           # - name: CYMBAL_BRANDING
@@ -348,7 +344,6 @@ spec:
       labels:
         app: paymentservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -412,7 +407,6 @@ spec:
       labels:
         app: productcatalogservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -476,7 +470,6 @@ spec:
       labels:
         app: cartservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -541,7 +534,6 @@ spec:
       labels:
         app: currencyservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -606,7 +598,6 @@ spec:
       labels:
         app: shippingservice
     spec:
-      serviceAccountName: default
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -735,7 +726,6 @@ spec:
       labels:
         app: adservice
     spec:
-      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
