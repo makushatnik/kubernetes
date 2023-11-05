@@ -33,7 +33,7 @@ securityContext:
 
 env:
   frontend_srv:
-  - name: FRONTEND_SRV
+  - name: FRONTEND_ADDR
     valueFrom:
       configMapKeyRef:
         name: cmloadgenerator

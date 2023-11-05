@@ -14,7 +14,7 @@
 `ansible-playbook -i hosts.ini kube-ansible.yml`
 7. Setup Kubernetes:
 ```
-kubeadm init --control-plane-endpoint ... --upload-certs --pod-network-cidr 192.168.0.0/16 | tee -a kubeadm.log
+kubeadm init --control-plane-endpoint 172.16.. --upload-certs --pod-network-cidr 192.168.0.0/16 | tee -a kubeadm.log
 kubeadm join ...:6443 --token ... --discovery-token-ca-cert-hash sha256:... --control-plane --certificate-key
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
@@ -26,3 +26,11 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 2. Create Ingress:
 `kubectl create -f ingress.yml`
 3. docker build https://github.com/GoogleCloudPlatform/microservices-demo.git#main:src/loadgenerator -t loadgenerator
+4. Generate SSH key for Git:
+`ssh-keygen -o`
+5. Load the repository:
+`git clone ssh://github.com/makushatnik/kubernetes.git`
+6. Go into the directory *step2/loadgenerator*.
+7. Install Helm chart:
+`helm upgrade --install loadgenerator . --version 1.0.0`
+

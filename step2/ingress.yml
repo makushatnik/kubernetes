@@ -4,17 +4,15 @@ kind: Ingress
 metadata:
   name: frontend-ingress
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    kubernetes.io/ingress.class: "nginx"
 spec:
-  ingressClassName: nginx
   rules:
     - http:
         paths:
-        - path: "/eshop(/|$)(.*)"
+        - path: /
           pathType: Prefix
           backend:
             service:
               name: frontend
               port:
-                number: 8080
+                name: http
