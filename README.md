@@ -20,6 +20,14 @@ kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/baremetal/deploy.yaml
 ```
+8. Find out which particular port used by Ingress Nginx Controller:
+`kubectl get svc -n ingress-nginx`
+9. Change port 32000 to this port at lb machine in the HAProxy config:
+```
+nano /etc/haproxy/haproxy.cfg
+    http <port>
+systemctl restart haproxy
+```
 
 ### Application
 1. kubectl create -f kubernetes-manifests.yaml
@@ -29,8 +37,19 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 4. Generate SSH key for Git:
 `ssh-keygen -o`
 5. Load the repository:
-`git clone ssh://github.com/makushatnik/kubernetes.git`
-6. Go into the directory *step2/loadgenerator*.
-7. Install Helm chart:
+`git clone ssh://github.com/makushatnik/kubernetes.git && cd kubernetes/step2/loadgenerator`
+6. Install Helm chart:
 `helm upgrade --install loadgenerator . --version 1.0.0`
+
+
+### Create DOCKER_JSON
+1. `docker login registry.gitlab.com -u <USER> -p <PASSWORD>`
+2. Run a command:
+`cat .docker/config.json | base64`
+3. Copy a cypher, go to Gitlab Secrets page & paste in a new variable - DOCKER_CONFIG.
+
+### Start runner
+1. `ssh ubuntu@<worker_ip>`
+2. Install runner:
+`cmd`
 

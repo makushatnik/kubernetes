@@ -54,21 +54,13 @@ spec:
           value: "8080"
         - name: DISABLE_PROFILER
           value: "1"
-        readinessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 8080
-        livenessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 8080
         resources:
           requests:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 100m
+            memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -113,12 +105,6 @@ spec:
           image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.8.1
           ports:
           - containerPort: 5050
-          readinessProbe:
-            grpc:
-              port: 5050
-          livenessProbe:
-            grpc:
-              port: 5050
           env:
           - name: PORT
             value: "5050"
@@ -139,8 +125,8 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 100m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -186,14 +172,6 @@ spec:
         image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.8.1
         ports:
         - containerPort: 8080
-        readinessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 8080
-        livenessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 8080
         env:
         - name: PORT
           value: "8080"
@@ -206,8 +184,8 @@ spec:
             cpu: 100m
             memory: 220Mi
           limits:
-            cpu: 200m
-            memory: 450Mi
+            cpu: 100m
+            memory: 220Mi
 ---
 apiVersion: v1
 kind: Service
@@ -226,7 +204,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  instance/attributes/cluster-name: myk8s
+  # instance/attributes/cluster-name: myk8s
 spec:
   selector:
     matchLabels:
@@ -237,7 +215,7 @@ spec:
         app: frontend
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
-      instance/attributes/cluster-name: myk8s
+      # instance/attributes/cluster-name: myk8s
     spec:
       securityContext:
         fsGroup: 1000
@@ -256,22 +234,23 @@ spec:
           image: gcr.io/google-samples/microservices-demo/frontend:v0.8.1
           ports:
           - containerPort: 8080
-          readinessProbe:
-            initialDelaySeconds: 10
-            httpGet:
-              path: "/_healthz"
-              port: 8080
-              httpHeaders:
-              - name: "Cookie"
-                value: "shop_session-id=x-readiness-probe"
-          livenessProbe:
-            initialDelaySeconds: 10
-            httpGet:
-              path: "/_healthz"
-              port: 8080
-              httpHeaders:
-              - name: "Cookie"
-                value: "shop_session-id=x-liveness-probe"
+          # Not convenient for testing. Enable in future
+          # readinessProbe:
+          #   initialDelaySeconds: 10
+          #   httpGet:
+          #     path: "/_healthz"
+          #     port: 8080
+          #     httpHeaders:
+          #     - name: "Cookie"
+          #       value: "shop_session-id=x-readiness-probe"
+          # livenessProbe:
+          #   initialDelaySeconds: 10
+          #   httpGet:
+          #     path: "/_healthz"
+          #     port: 8080
+          #     httpHeaders:
+          #     - name: "Cookie"
+          #       value: "shop_session-id=x-liveness-probe"
           env:
           - name: PORT
             value: "8080"
@@ -295,15 +274,15 @@ spec:
             value: "0"
           # - name: CYMBAL_BRANDING
           #   value: "true"
-          # - name: FRONTEND_MESSAGE
-          #   value: "Replace this with a message you want to display on all pages."
+          - name: FRONTEND_MESSAGE
+            value: "There's no resistance method against hacking!<br>Против взлома нет приема."
           resources:
             requests:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 100m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -361,25 +340,19 @@ spec:
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/paymentservice:v0.8.1
         ports:
-        - containerPort: 50051
+        - containerPort: 50052
         env:
         - name: PORT
-          value: "50051"
+          value: "50052"
         - name: DISABLE_PROFILER
           value: "1"
-        readinessProbe:
-          grpc:
-            port: 50051
-        livenessProbe:
-          grpc:
-            port: 50051
         resources:
           requests:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 100m
+            memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -391,8 +364,8 @@ spec:
     app: paymentservice
   ports:
   - name: grpc
-    port: 50051
-    targetPort: 50051
+    port: 50052
+    targetPort: 50052
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -430,19 +403,13 @@ spec:
           value: "3550"
         - name: DISABLE_PROFILER
           value: "1"
-        readinessProbe:
-          grpc:
-            port: 3550
-        livenessProbe:
-          grpc:
-            port: 3550
         resources:
           requests:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 100m
+            memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -496,17 +463,8 @@ spec:
             cpu: 200m
             memory: 64Mi
           limits:
-            cpu: 300m
-            memory: 128Mi
-        readinessProbe:
-          initialDelaySeconds: 15
-          grpc:
-            port: 7070
-        livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          grpc:
-            port: 7070
+            cpu: 200m
+            memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -558,19 +516,13 @@ spec:
           value: "7000"
         - name: DISABLE_PROFILER
           value: "1"
-        readinessProbe:
-          grpc:
-            port: 7000
-        livenessProbe:
-          grpc:
-            port: 7000
         resources:
           requests:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 100m
+            memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -620,20 +572,13 @@ spec:
           value: "50051"
         - name: DISABLE_PROFILER
           value: "1"
-        readinessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 50051
-        livenessProbe:
-          grpc:
-            port: 50051
         resources:
           requests:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 100m
+            memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -678,21 +623,13 @@ spec:
         image: redis:alpine
         ports:
         - containerPort: 6379
-        readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
         volumeMounts:
         - mountPath: /data
           name: redis-data
         resources:
           limits:
-            memory: 256Mi
-            cpu: 125m
+            memory: 200Mi
+            cpu: 70m
           requests:
             cpu: 70m
             memory: 200Mi
@@ -747,23 +684,14 @@ spec:
         env:
         - name: PORT
           value: "9555"
+        # Java, so necessary to pay attention
         resources:
           requests:
             cpu: 200m
             memory: 180Mi
           limits:
-            cpu: 300m
-            memory: 300Mi
-        readinessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
-          grpc:
-            port: 9555
-        livenessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
-          grpc:
-            port: 9555
+            cpu: 200m
+            memory: 180Mi
 ---
 apiVersion: v1
 kind: Service
