@@ -1,6 +1,6 @@
 ---
 - hosts: control_plane,workers
-  become: yes
+  become: true
   gather_facts: true
 
   tasks:
@@ -76,21 +76,24 @@
         name: kubelet=1.23.7-00
         state: present
         update_cache: true
+        # allow_downgrade: yes
         force: yes
 
     - name: install kubeadm
       apt:
         name: kubeadm=1.23.7-00
         state: present
+        # allow_downgrade: yes
         force: yes
 
 - hosts: control_plane
-  become: yes
+  become: true
   tasks:
     - name: install kubectl
       apt:
         name: kubectl=1.23.7-00
         state: present
+        # allow_downgrade: yes
         force: yes
 
     - name: install helm
@@ -134,3 +137,17 @@
       service:
         name: haproxy
         state: started
+
+- hosts: workers
+  tasks:
+
+  - name: Install Git
+    become: true
+    apt:
+      name: git
+      state: present
+  
+  - name: Install Gitlab Runner
+    shell: |
+      curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"
+      sudo dpkg -i gitlab-runner_amd64.deb
