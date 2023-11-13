@@ -32,7 +32,8 @@ systemctl restart haproxy
 and insert in a Gitlab Secret KUBE_CONFIG
 
 ### Application
-1. kubectl create -f kubernetes-manifests.yaml
+1. Create application services:
+`kubectl create -f kubernetes-manifests.yaml`
 2. Create Ingress:
 `kubectl create -f ingress.yml`
 #3. Install Helm chart:
