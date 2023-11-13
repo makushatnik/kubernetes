@@ -37,7 +37,7 @@ resource "yandex_compute_instance_group" "k8s-masters" {
     }
 
     metadata = {
-      ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
     }
     network_settings {
       type = "STANDARD"
@@ -108,7 +108,7 @@ resource "yandex_compute_instance_group" "k8s-workers" {
     }
 
     metadata = {
-      ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
     }
     network_settings {
       type = "STANDARD"
@@ -178,7 +178,7 @@ resource "yandex_compute_instance_group" "k8s-haproxy" {
     }
 
     metadata = {
-      ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
     }
     network_settings {
       type = "STANDARD"
@@ -244,7 +244,7 @@ resource "yandex_compute_instance_group" "k8s-haproxy" {
 #     }
 
 #     metadata = {
-#       ssh-keys = "wizard:${file("~/.ssh/id_rsa.pub")}"
+#       ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
 #     }
 #     network_settings {
 #       type = "STANDARD"
