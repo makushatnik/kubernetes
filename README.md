@@ -35,9 +35,9 @@ and insert in a Gitlab Secret KUBE_CONFIG
 1. kubectl create -f kubernetes-manifests.yaml
 2. Create Ingress:
 `kubectl create -f ingress.yml`
-3. docker build https://github.com/GoogleCloudPlatform/microservices-demo.git#main:src/loadgenerator -t loadgenerator
-4. Install Helm chart:
-`helm upgrade --install loadgenerator . --version 1.0.0`
+#3. Install Helm chart:
+#`helm upgrade --install loadgenerator . --version 1.0.0`
+3. Make a commit, push it, Gitlab runner will install loadgenerator's helm chart, then.
 
 
 ### Create DOCKER_JSON
