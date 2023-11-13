@@ -102,7 +102,7 @@
         chmod 700 get_helm.sh
         ./get_helm.sh
 
-- name: Install haproxy
+- name: Install HAproxy
   hosts: lb
   become: true
   gather_facts: true
@@ -138,16 +138,19 @@
         name: haproxy
         state: started
 
-- hosts: workers
+- hosts: control1
   tasks:
 
-  - name: Install Git
-    become: true
-    apt:
-      name: git
-      state: present
+  - name: Copy manifests to Master1
+    copy:
+      src: /home/stranger/src/kubernetes/step2/kubernetes-manifests.yaml
+      dest: /home/ubuntu/manifests2.yml
+      owner: ubuntu
+      group: ubuntu
   
-  - name: Install Gitlab Runner
-    shell: |
-      curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"
-      sudo dpkg -i gitlab-runner_amd64.deb
+  - name: Copy ingress to Master1
+    copy:
+      src: /home/stranger/src/kubernetes/step2/ingress.yml
+      dest: /home/ubuntu/ingress2.yml
+      owner: ubuntu
+      group: ubuntu
