@@ -24,7 +24,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 8. Change port 32000 to this port at lb machine in the HAProxy config:
 ```
 nano /etc/haproxy/haproxy.cfg
-    http<num> <ip>:<port>
+    server http<num> <ip>:<port>
 systemctl restart haproxy
 ```
 9. Ssh to any of master, take a kube config:
@@ -37,21 +37,16 @@ and insert in a Gitlab Secret KUBE_CONFIG
 `kubectl create -f ingress.yml`
 #3. Install Helm chart:
 #`helm upgrade --install loadgenerator . --version 1.0.0`
-3. Make a commit, push it, Gitlab runner will install loadgenerator's helm chart, then.
-
-
-### Create DOCKER_JSON
-1. `docker login registry.gitlab.com -u <USER> -p <PASSWORD>`
-2. Run a command:
-`cat .docker/config.json | base64`
-3. Copy a cypher, go to Gitlab Secrets page & paste in a new variable - DOCKER_CONFIG.
-
-### Start runner
-1. `ssh ubuntu@<worker_ip>`
-2. Start runner:
+3. Run commands:
 ```
-gitlab-runner register --url https://gitlab.com --token <token>
-gitlab-runner run
+helm repo add gitlab https://charts.gitlab.io
+helm install gitlab-runner \
+  --set gitlabUrl=https://gitlab.com \
+  --set runnerRegistrationToken=<runner token> \
+  --set rbac.create=true \
+  gitlab/gitlab-runner
 ```
+4. Make a commit, push it, Gitlab runner will install loadgenerator's helm chart, then.
+
 
 
