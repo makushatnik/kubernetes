@@ -1,0 +1,40 @@
+#include:
+#  - template: SAST.gitlab-ci.yaml
+
+variables:
+  IMAGE_NAME: ${CI_REGISTRY}/${CI_PROJECT_PATH}/loadgenerator:${CI_COMMIT_SHORT_SHA}
+
+
+stages:
+#  - test
+  - build
+  - deploy
+
+
+build:
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  stage: build
+  script:
+    - /kaniko/executor
+        --context "$CI_PROJECT_DIR/loadgenerator"
+        --dockerfile "$CI_PROJECT_DIR/loadgenerator/Dockerfile"
+        --destination "$IMAGE_NAME"
+  #tags:
+  #  - kuber
+
+deploy:
+  image:
+    name: dtzar/helm-kubectl
+    entrypoint: [""]
+  stage: deploy
+  before_script:
+    - mkdir ~/.kube/
+    - echo $KUBE_CONFIG | base64 -d > ~/.kube/config
+    - chmod 400 ~/.kube/config
+    - export KUBE_CONFIG=~/.kube/config
+  script:
+    - helm upgrade --install loadgenerator ${CI_PROJECT_DIR}/loadgenerator/helm/ --set deployment.image=$IMAGE_NAME
+  #tags:
+  #  - kuber

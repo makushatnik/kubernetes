@@ -1,0 +1,7 @@
+apiVersion: v2
+name: main
+description: A Helm chart for Loadgenerator app
+type: application
+
+version: 1.0.0
+appVersion: "1.0.0"
