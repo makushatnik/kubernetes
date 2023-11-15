@@ -110,19 +110,19 @@
     my_file: /etc/haproxy/haproxy.cfg
     my_template: templates/haproxy.j2
   tasks:
-    - name: gather facts from the control_plane
+    - name: Gather facts from the control_plane
       tags: [ 'control_plane' ]
       setup:
       delegate_to: "{{item}}"
       delegate_facts: True
       with_items: "{{groups['control_plane']}}"
-    - name: install haproxy
+    - name: Install HAproxy
       apt:
         name: haproxy
         state: present
         update_cache: true
         force: yes
-    - name: Stop haproxy service
+    - name: Stop HAproxy service
       service:
         name: haproxy
         state: stopped
@@ -133,10 +133,17 @@
         owner: root
         group: root
         mode: "0644"
-    - name: start haproxy service
+    - name: Start HAproxy service
       service:
         name: haproxy
         state: started
+    - name: Take Inner IP
+      shell: |
+        ip a show eth0 | egrep "([0-9]{1,3}[\.]){3}[0-9]{1,3}/" -o | egrep "([0-9]{1,3}[\.]){3}[0-9]{1,3}" -o
+      register: inner_ip
+    - name: Echo Inner IP
+      debug:
+        msg: "LB Inner IP: {{ inner_ip['stdout'] }}"
 
 - hosts: control1
   tasks:
@@ -144,13 +151,13 @@
   - name: Copy manifests to Master1
     copy:
       src: /home/stranger/src/kubernetes/step2/kubernetes-manifests.yaml
-      dest: /home/ubuntu/manifests2.yml
+      dest: /home/ubuntu/manifests.yml
       owner: ubuntu
       group: ubuntu
   
   - name: Copy ingress to Master1
     copy:
       src: /home/stranger/src/kubernetes/step2/ingress.yml
-      dest: /home/ubuntu/ingress2.yml
+      dest: /home/ubuntu/ingress.yml
       owner: ubuntu
       group: ubuntu
