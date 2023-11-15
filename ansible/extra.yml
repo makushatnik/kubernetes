@@ -1,12 +1,15 @@
 ---
+- hosts: control_plane
+  tasks:
+    - name: Copy kube config to user's home dir
+      shell: |
+        mkdir -p $HOME/.kube
+        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
 - hosts: control1
   tasks:
-
-  - name: Copy kube config to user's home dir
-    shell: |
-      mkdir -p $HOME/.kube
-      sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-      sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
   - name: Install CNI Calico
     shell: |
@@ -17,6 +20,92 @@
     shell: |
       kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/baremetal/deploy.yaml
 
+  - name: Take a Kube config
+    fetch:
+      src: /home/ubuntu/.kube/config
+      dest: /home/stranger/
+      flat: true
+  
   - name: Take an Ingress Nginx Controller port
     shell: |
       kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[0].nodePort}'
+    register: node_port
+  
+  - name: Write Node port to a file
+    shell: |
+      echo "{{ node_port['stdout'] }}" > node_port.txt
+  
+  - name: Copy Node port file to localhost
+    fetch:
+      src: /home/ubuntu/node_port.txt
+      dest: /home/stranger/
+      flat: true
+
+  - name: Create application services
+    shell: |
+      kubectl apply -f manifests.yml
+      kubectl apply -f ingress.yml
+
+  - name: Create Gitlab runner
+    shell: |
+      helm repo add gitlab https://charts.gitlab.io
+      helm install gitlab-runner \
+        --set gitlabUrl=https://gitlab.com \
+        --set runnerRegistrationToken={{ lookup('env','GITLAB_RUNNER_TOKEN') }} \
+        --set rbac.create=true \
+        gitlab/gitlab-runner
+  
+  - name: Create Prometheus
+    shell: |
+      kubectl create ns monitoring
+      helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      helm repo update
+      helm upgrade --install prometheus prometheus-community/prometheus -n monitoring
+  
+  - name: Create Grafana
+    shell: |
+      helm repo add grafana https://grafana.github.io/helm-charts
+      helm repo update
+      helm upgrade --install grafana grafana/grafana -n monitoring
+  
+  - name: Get Grafana password
+    shell: |
+      kubectl get secret -n monitoring grafana -o jsonpath="{.data.admin-password}" | base64 -d
+    register: grafana_pass
+  
+  - name: Show Grafana password
+    debug:
+      msg: "Pass - {{ node_port['grafana_pass'] }}"
+  
+  - name: Create Cert-manager
+    shell: |
+      kubectl create ns cert-manager
+      kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.13.0/cert-manager.yaml
+
+
+- hosts: lb
+  tasks:
+    - name: Copy Node port file to an LB
+      copy:
+        src: /home/stranger/node_port.txt
+        dest: /home/ubuntu/node_port.txt
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Read Node Port from a file
+      shell: cat node_port.txt
+      register: node_port
+
+    - name: Echo Node Port
+      debug:
+        msg: "Node port: {{ node_port['stdout'] }}"
+    
+    - name: Replace dummy port to a real Node port
+      shell: |
+        sed "s/32000/{{ node_port['stdout'] }}/g" /etc/haproxy/haproxy.cfg > haproxy.cfg
+        sudo mv haproxy.cfg /etc/haproxy/haproxy.cfg
+    
+    - name: Restart HAproxy service
+      service:
+        name: haproxy
+        state: restarted
